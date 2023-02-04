@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import { readDeck, updateDeck } from '../../utils/api';
-import Breadcrumbs from '../Common/Breadcrumbs';
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
 
 export default function EditDeck() {
   const [deck, setDeck] = useState({ name: '', description: '' });
@@ -33,51 +30,61 @@ export default function EditDeck() {
 
   return (
     <>
-      <Breadcrumbs
-        prev={deck.name}
-        link={`/decks/${deckId}`}
-        current='Edit Deck'
-      />
+      <nav aria-label='breadcrumb'>
+        <ol className='breadcrumb'>
+          <li className='breadcrumb-item'>
+            <Link to='/'>
+              <span className='oi oi-home' /> Home
+            </Link>
+          </li>
+          <li className='breadcrumb-item'>
+            <Link to={`/decks/${deckId}`}>Deck {deck.name}</Link>
+          </li>
+          <li className='breadcrumb-item active' aria-current='page'>
+            Edit Deck
+          </li>
+        </ol>
+      </nav>
       <h1 style={{ marginBottom: '1rem' }}>Edit Deck</h1>
-      <Form onSubmit={submitHandler}>
-        <Form.Group className='mb-3'>
-          <Form.Label>Name</Form.Label>
-          <Form.Control
-            id='name'
-            name='name'
-            type='text'
-            value={deck.name}
-            onChange={changeHandler}
-            placeholder={deck.name}
-            required
-          />
-        </Form.Group>
-        <Form.Group className='mb-3'>
-          <Form.Label>Description</Form.Label>
-          <Form.Control
-            id='description'
-            name='description'
-            as='textarea'
-            style={{ height: '7rem' }}
-            value={deck.description}
-            onChange={changeHandler}
-            placeholder={deck.description}
-            required
-          />
-          <div style={{ marginTop: '0.8rem' }}>
-            <Button
-              variant='secondary'
-              style={{ marginRight: '0.5rem' }}
-              onClick={() => history.push('/')}
-            >
-              Cancel
-            </Button>
-            <Button variant='primary' type='submit'>
-              Submit
-            </Button>
+      <form onSubmit={submitHandler} className='card-form'>
+        <fieldset>
+          <div className='form-group'>
+            <label>Name</label>
+            <input
+              id='name'
+              name='name'
+              type='text'
+              value={deck.name}
+              onChange={changeHandler}
+              placeholder={deck.name}
+              required={true}
+            />
           </div>
-        </Form.Group>
-      </Form>
+          <div className='form-group'>
+            <label>Description</label>
+            <textarea
+              id='description'
+              name='description'
+              style={{ height: '7rem' }}
+              value={deck.description}
+              onChange={changeHandler}
+              placeholder={deck.description}
+              required
+            />
+          </div>
+
+          <button
+            className='btn btn-secondary mr-2'
+            onClick={() => history.push('/')}
+            tabIndex='4'
+          >
+            Cancel
+          </button>
+          <button type='submit' className='btn btn-primary' tabIndex='3'>
+            Submit
+          </button>
+        </fieldset>
+      </form>
     </>
   );
 }

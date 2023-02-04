@@ -1,71 +1,90 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { readDeck } from '../../utils/api';
-import Breadcrumbs from '../Common/Breadcrumbs';
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+import { createDeck } from '../../utils/api';
 
 export default function Deck({ deleteDeckHandler }) {
-  const [deck, setDeck] = useState({});
-  const { deckId } = useParams();
+  // Store new deck data with useState
+  const [formData, setFormData] = useState({ name: '', description: '' });
+  const history = useHistory();
 
-  useEffect(() => {
-    async function loadDeck() {
-      const loadedDeck = await readDeck(deckId);
-      setDeck(loadedDeck);
+  // Handle entered deck data
+  const changeHandler = ({ target }) => {
+    setFormData({ ...formData, [target.name]: target.value });
+  };
+
+  // Handle submitted deck data and create new deck with it
+  const submitHandler = (e) => {
+    e.preventDefault();
+
+    async function deckCreate() {
+      try {
+        await createDeck(formData);
+        setFormData({ name: '', description: '' });
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          throw error;
+        }
+      }
     }
-    loadDeck();
-  }, [deckId]);
+    deckCreate();
+    history.push('/');
+    window.location.reload();
+  };
 
   return (
     <div>
-      <nav aria-label="breadcrumb">
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item">
-            <Link to="/">
-              <span className="oi oi-home" /> Home
+      <nav aria-label='breadcrumb'>
+        <ol className='breadcrumb'>
+          <li className='breadcrumb-item'>
+            <Link to='/'>
+              <span className='oi oi-home' /> Home
             </Link>
           </li>
-          <li className="breadcrumb-item active" aria-current="page">
+          <li className='breadcrumb-item active' aria-current='page'>
             Create Deck
           </li>
         </ol>
       </nav>
       <h1>Create Deck</h1>
-      <h3>{deck.name}</h3>
-      <p>{deck.description}</p>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <span style={{ display: 'inline-flex' }}>
-          <div>
-            <Link to={`/decks/${deckId}/edit`}>
-              <button variant='secondary' style={{ marginRight: '0.5rem' }}>
-                  <span className="oi oi-pencil" />
-                  Edit
-              </button>
-            </Link>
+      <form onSubmit={submitHandler} className='card-form'>
+        <fieldset>
+          <div className='form-group'>
+            <label>Name</label>
+            <input
+              id='name'
+              name='name'
+              type='text'
+              value={formData.name}
+              onChange={changeHandler}
+              placeholder='Deck Name'
+              required={true}
+            />
           </div>
-          <div>
-            <Link to={`/decks/${deck.id}/study`}>
-              <button variant='primary' style={{ marginRight: '0.5rem' }}>
-                  <span className="oi oi-book" />
-                  Study
-              </button>
-            </Link>
+          <div className='form-group'>
+            <label>Description</label>
+            <textarea
+              id='description'
+              name='description'
+              style={{ height: '7rem' }}
+              value={formData.description}
+              onChange={changeHandler}
+              placeholder='Brief description of the deck'
+              required
+            />
           </div>
-          <div>
-            <Link to={`/decks/${deckId}/cards/new`}>
-              <button variant='primary' style={{ marginBottom: '0.5rem' }}>
-                  <span className="oi oi-plus" />
-                  Add Card
-              </button>
-            </Link>
-          </div>
-        </span>
-        <div>
-          <button onClick={() => deleteDeckHandler(deckId)} variant='danger'>
-            <span className="oi oi-trash" />
+
+          <button
+            className='btn btn-secondary mr-2'
+            onClick={() => history.push('/')}
+            tabIndex='4'
+          >
+            Cancel
           </button>
-        </div>
-      </div>
-      <Cards deck={deck} />
+          <button type='submit' className='btn btn-primary' tabIndex='3'>
+            Submit
+          </button>
+        </fieldset>
+      </form>
     </div>
   );
 }
